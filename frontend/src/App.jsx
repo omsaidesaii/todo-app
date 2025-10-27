@@ -1,28 +1,42 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from './context/AuthContext'
+import { authFetch } from './services/api'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Card, CardContent } from './components/ui/card'
 import { Checkbox } from './components/ui/checkbox'
+import Login from './components/Login'
+import Signup from './components/Signup'
 
 function App() {
+  const [isLogin, setIsLogin] = useState(true)
   const [todos, setTodos] = useState([])
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { user, isAuthenticated, logout } = useAuth()
 
   const API_URL = 'http://localhost:5000/api/todos'
 
-  // Fetch todos on mount
+  // Fetch todos on mount and when authenticated
   useEffect(() => {
-    fetchTodos()
-  }, [])
+    if (isAuthenticated) {
+      fetchTodos()
+    }
+  }, [isAuthenticated])
 
   const fetchTodos = async () => {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(API_URL)
-      if (!response.ok) throw new Error('Failed to fetch todos')
+      const response = await authFetch(API_URL)
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout()
+          throw new Error('Unauthorized. Please login again.')
+        }
+        throw new Error('Failed to fetch todos')
+      }
       const data = await response.json()
       setTodos(data)
     } catch (err) {
@@ -38,9 +52,8 @@ function App() {
     setLoading(true)
     setError(null)
     try {
-      const response = await fetch(API_URL, {
+      const response = await authFetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: inputValue })
       })
       if (!response.ok) throw new Error('Failed to add todo')
@@ -57,9 +70,8 @@ function App() {
   const toggleTodo = async (id, completed) => {
     setError(null)
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await authFetch(`${API_URL}/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ completed: !completed })
       })
       if (!response.ok) throw new Error('Failed to update todo')
@@ -73,7 +85,7 @@ function App() {
   const deleteTodo = async (id) => {
     setError(null)
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await authFetch(`${API_URL}/${id}`, {
         method: 'DELETE'
       })
       if (!response.ok) throw new Error('Failed to delete todo')
@@ -88,12 +100,34 @@ function App() {
     addTodo()
   }
 
+  // Show login/signup if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 flex items-center justify-center">
+        {isLogin ? (
+          <Login onSwitch={() => setIsLogin(false)} />
+        ) : (
+          <Signup onSwitch={() => setIsLogin(true)} />
+        )}
+      </div>
+    )
+  }
+
+  // Show todo list if authenticated
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
-          My Todo List
-        </h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">
+            My Todo List
+          </h1>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-700">Welcome, {user?.name}!</span>
+            <Button variant="outline" onClick={logout}>
+              Logout
+            </Button>
+          </div>
+        </div>
 
         <Card className="mb-6">
           <CardContent className="p-6">
@@ -160,4 +194,3 @@ function App() {
 }
 
 export default App
-
