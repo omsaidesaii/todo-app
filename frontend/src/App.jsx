@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from './context/AuthContext'
 import { authFetch } from './services/api'
+import { TODOS_API } from './config'
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
 import { Select } from './components/ui/select'
@@ -22,7 +23,7 @@ function App() {
   const [error, setError] = useState(null)
   const { user, isAuthenticated, logout } = useAuth()
 
-  const API_URL = 'http://localhost:5000/api/todos'
+  const API_URL = TODOS_API
 
   const categories = ['All', 'General', 'Work', 'Personal', 'Shopping', 'Health', 'Education']
 
