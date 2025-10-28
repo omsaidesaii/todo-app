@@ -46,7 +46,7 @@ app.get('/api/todos', auth, async (req, res) => {
 
 app.post('/api/todos', auth, async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, dueDate, category } = req.body;
     if (!text) {
       return res.status(400).json({ error: 'Text is required' });
     }
@@ -56,6 +56,8 @@ app.post('/api/todos', auth, async (req, res) => {
       text,
       completed: false,
       userId: req.user.id,
+      category: category || 'General',
+      dueDate: dueDate ? new Date(dueDate) : null,
       createdAt: new Date()
     };
     
@@ -70,7 +72,7 @@ app.post('/api/todos', auth, async (req, res) => {
 app.put('/api/todos/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { text, completed } = req.body;
+    const { text, completed, dueDate, category } = req.body;
     const db = req.app.locals.db;
     
     // Verify ownership
@@ -85,6 +87,8 @@ app.put('/api/todos/:id', auth, async (req, res) => {
     const update = {};
     if (text !== undefined) update.text = text;
     if (completed !== undefined) update.completed = completed;
+    if (dueDate !== undefined) update.dueDate = dueDate ? new Date(dueDate) : null;
+    if (category !== undefined) update.category = category;
     
     const result = await db.collection('todos').updateOne(
       { _id: new ObjectId(id) },

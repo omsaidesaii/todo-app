@@ -9,6 +9,10 @@ A full-stack todo list application built with React, MongoDB, and Express with J
 - **Create new todos**: Add todos with a clean interface
 - **Mark todos complete/incomplete**: Toggle completion status
 - **Delete todos**: Remove unwanted todos
+- **Due dates**: Add due dates to track deadlines with overdue warnings
+- **Categories**: Organize todos by category (Work, Personal, Shopping, Health, Education)
+- **Search**: Quickly find todos with search functionality
+- **Filtering**: Filter by category and show/hide completed todos
 - **Beautiful UI**: Built with Shadcn UI components and Tailwind CSS
 - **Secure**: Passwords hashed with bcrypt, JWT authentication
 
