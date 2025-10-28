@@ -10,7 +10,10 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://todo-app-delta-two-56.vercel.app'],
+  credentials: true
+}));
 app.use(express.json());
 
 let db;
